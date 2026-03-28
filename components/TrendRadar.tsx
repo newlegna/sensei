@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { DefaultChatTransport } from "ai";
@@ -25,6 +25,11 @@ export default function TrendRadar() {
   const [selectedTrend, setSelectedTrend] = useState<Trend | null>(null);
   const [activeTab, setActiveTab] = useState<"trends" | "ingest">("trends");
   const [lastScanned, setLastScanned] = useState<string | null>(null);
+  const [autoScan, setAutoScan] = useState(true);
+  const [nextScanIn, setNextScanIn] = useState<number | null>(null);
+  const autoScanInterval = 60; // seconds between auto-scans
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const trendContext = selectedTrend
     ? `Selected trend: "${selectedTrend.title}" (${selectedTrend.source}, ${selectedTrend.score} points). Covered: ${selectedTrend.covered}.\n${selectedTrend.brief}`
@@ -57,6 +62,34 @@ export default function TrendRadar() {
     }
   }, []);
 
+  // Auto-scan on interval
+  useEffect(() => {
+    if (!autoScan) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      setNextScanIn(null);
+      return;
+    }
+
+    // Run initial scan on mount
+    runScan();
+    setNextScanIn(autoScanInterval);
+
+    timerRef.current = setInterval(() => {
+      runScan();
+      setNextScanIn(autoScanInterval);
+    }, autoScanInterval * 1000);
+
+    countdownRef.current = setInterval(() => {
+      setNextScanIn(prev => (prev && prev > 0 ? prev - 1 : autoScanInterval));
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [autoScan, runScan]);
+
   const gaps = trends.filter(t => !t.covered);
   const covered = trends.filter(t => t.covered);
 
@@ -83,6 +116,13 @@ export default function TrendRadar() {
                 </span>
               ))}
             </div>
+            <button
+              onClick={() => setAutoScan(!autoScan)}
+              className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${autoScan ? "bg-emerald-100 text-emerald-700 border border-emerald-300" : "bg-slate-100 text-slate-500 border border-slate-200"}`}
+            >
+              <span className={`w-2 h-2 rounded-full ${autoScan ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+              {autoScan ? `Auto-scan ${nextScanIn ? `(${nextScanIn}s)` : "ON"}` : "Auto-scan OFF"}
+            </button>
             <button
               onClick={runScan}
               disabled={scanState === "scanning"}

@@ -1,4 +1,4 @@
-import { anthropic } from "@ai-sdk/anthropic";
+import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { Unkey } from "@unkey/api";
 
@@ -45,7 +45,7 @@ Be direct, specific, and actionable. No fluff.
 Powered by: Railtracks 🚂 | Senso.ai 📚 | Unkey 🔑 | assistant-ui 💬 | Augment Code 🤖`;
 
   const result = streamText({
-    model: anthropic("claude-sonnet-4-5"),
+    model: google("gemini-2.5-flash"),
     system: systemPrompt,
     messages,
     maxOutputTokens: 1000,

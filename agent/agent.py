@@ -74,7 +74,7 @@ def generate_content_brief(topic: str, source: str, trend_score: int, covered: b
 
 
 def create_trend_agent():
-    llm = rt.llm.AnthropicLLM("claude-sonnet-4-5")
+    llm = rt.llm.GeminiLLM("gemini-2.5-flash")
     agent = rt.agent_node(
         "Trend Radar Agent",
         tool_nodes=[check_senso_coverage, generate_content_brief],
