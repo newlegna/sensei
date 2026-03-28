@@ -1,0 +1,37 @@
+{
+  "version": "1.0.0",
+  "keywords": [
+    "trend-radar",
+    "content-strategy",
+    "hackernews",
+    "reddit",
+    "github",
+    "senso",
+    "railtracks",
+    "claude-code"
+  ],
+  "categories": [
+    "ai-agents",
+    "content"
+  ],
+  "author": {
+    "name": "newlegna",
+    "github": "newlegna"
+  },
+  "config": {
+    "env": [
+      {
+        "name": "ANTHROPIC_API_KEY",
+        "description": "Anthropic API key for Claude",
+        "required": true,
+        "secret": true
+      },
+      {
+        "name": "SENSO_API_KEY",
+        "description": "Senso.ai API key for knowledge base",
+        "required": true,
+        "secret": true
+      }
+    ]
+  }
+}
