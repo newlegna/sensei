@@ -25,11 +25,18 @@ export default function TrendRadar() {
   const [selectedTrend, setSelectedTrend] = useState<Trend | null>(null);
   const [activeTab, setActiveTab] = useState<"trends" | "ingest">("trends");
   const [lastScanned, setLastScanned] = useState<string | null>(null);
-  const [autoScan, setAutoScan] = useState(true);
+  const [autoScan, setAutoScan] = useState(false);
   const [nextScanIn, setNextScanIn] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
   const autoScanInterval = 60; // seconds between auto-scans
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Enable auto-scan after mount to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+    setAutoScan(true);
+  }, []);
 
   const trendContext = selectedTrend
     ? `Selected trend: "${selectedTrend.title}" (${selectedTrend.source}, ${selectedTrend.score} points). Covered: ${selectedTrend.covered}.\n${selectedTrend.brief}`

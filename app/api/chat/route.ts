@@ -28,7 +28,17 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { messages, trendContext } = body;
+  const { messages: rawMessages, trendContext } = body;
+
+  // Sanitize messages to match AI SDK format
+  const messages = (rawMessages || []).map((m: { role: string; content: string | { type: string; text: string }[] }) => ({
+    role: m.role as "user" | "assistant",
+    content: typeof m.content === "string"
+      ? m.content
+      : Array.isArray(m.content)
+        ? m.content.map((p: { type: string; text: string }) => p.type === "text" ? p.text : "").join("")
+        : String(m.content),
+  })).filter((m: { role: string; content: string }) => m.content && (m.role === "user" || m.role === "assistant"));
 
   const systemPrompt = `You are Trend Radar — an AI content strategist that helps creators act on trends before they peak.
 
